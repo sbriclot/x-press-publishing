@@ -6,13 +6,13 @@ const express = require('express');
 
 const apiRouter = require('./api/api');
 
-// open express app
+//open express app
 const app = express();
 
-// set default port
+//set default port
 const PORT = process.env.PORT || 4000;
 
-// init morgan log level
+//init morgan log level
 morgan('short');
 
 //init body-parser, cors and errorhandler
