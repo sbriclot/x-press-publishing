@@ -4,6 +4,8 @@ const errorhandler = require('errorhandler');
 const morgan = require('morgan');
 const express = require('express');
 
+const apiRouter = require('./api/api');
+
 // open express app
 const app = express();
 
@@ -17,6 +19,9 @@ morgan('short');
 app.use(bodyParser.json());
 app.use(cors());
 app.use(errorhandler());
+
+//init API Router
+app.use('/api', apiRouter);
 
 app.listen(PORT, () => { console.log(`Server is listening on port ${PORT}`) });
 
