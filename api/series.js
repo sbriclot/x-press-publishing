@@ -2,9 +2,12 @@ const express = require('express');
 const seriesRouter = express.Router();
 
 const sqlite3 = require('sqlite3');
-const app = require('../server');
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite');
 
+const issuesRouter = require('./issues.js');
+seriesRouter.use('/:seriesId/issues', issuesRouter);
+
+//series index
 seriesRouter.get('/', (req, res, next) => {
   db.all(`SELECT * FROM Series`, (error, series) => {
           if (error) {
@@ -15,9 +18,8 @@ seriesRouter.get('/', (req, res, next) => {
   });
 });
 
+//series param route
 seriesRouter.param('seriesId', (req, res, next, seriesId) => {
-  // const sql = `SELECT * FROM Series WHERE id = ${seriesId}`;
-  // const values = {$seriesId: seriesId};
   db.get(`SELECT * FROM Series WHERE id = ${seriesId}`, (error, series) => {
     if (error) {
       next(error);
@@ -30,8 +32,8 @@ seriesRouter.param('seriesId', (req, res, next, seriesId) => {
   });
 });
 
+//check if mandatory fields are present
 const validatesRequired = (req, res, next) => {
-  //check if mandatory fields are present
   const name = req.body.series.name;
   const description = req.body.series.description;
   if (!name || !description) {
@@ -40,10 +42,12 @@ const validatesRequired = (req, res, next) => {
   next();
 };
 
+//select 1 specific series
 seriesRouter.get('/:seriesId', (req, res, next) => {
   res.status(200).json({ series: req.series });
 });
 
+//insert a new series
 seriesRouter.post('/', validatesRequired, (req, res, next) => {
   //insert the new series
   db.run(`INSERT INTO Series (name, description)
@@ -64,10 +68,9 @@ seriesRouter.post('/', validatesRequired, (req, res, next) => {
                        if (series) {
                         res.status(201).json({ series: series });
                        }
-                     });
+              });
             }
-          });
-
+  });
 });
 
 //update a series
@@ -90,9 +93,30 @@ seriesRouter.put('/:seriesId', validatesRequired, (req, res, next) => {
                      WHERE  id = ${req.params.seriesId}`,
                      (error, series) => {
                        res.status(200).json({ series: series });
-                     });
+             });
            }
-         });
+  });
+});
+
+//delete a series
+seriesRouter.delete('/:seriesId', (req, res, next) => {
+  db.get(`SELECT *
+          FROM Issue
+          WHERE Issue.series_id = ${req.params.seriesId}`, (error, issue) => {
+    if (error) {
+      next(error);
+    } else if (issue) {
+      res.sendStatus(400);
+    } else {
+      db.run(`DELETE FROM Series WHERE Series.id = ${req.params.seriesId}`, (error) => {
+        if (error) {
+          next(error);
+        } else {
+          res.sendStatus(204);
+        }
+      });
+    }
+  });
 });
 
 module.exports = seriesRouter;

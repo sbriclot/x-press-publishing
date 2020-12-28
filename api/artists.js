@@ -5,6 +5,7 @@ const sqlite3 = require('sqlite3');
 const app = require('../server');
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite');
 
+//arists index
 artistsRouter.get('/', (req, res, next) => {
   db.all(`SELECT *
           FROM   Artist
@@ -14,9 +15,10 @@ artistsRouter.get('/', (req, res, next) => {
             } else {
               res.status(200).json({ artists: artists });
             }
-          });
+  });
 });
 
+//artists param route
 artistsRouter.param('artistId', (req, res, next, artistId) => {
   db.get(`SELECT * FROM Artist WHERE Artist.id = ${artistId}`, (error, artist) => {
     if (error) {
@@ -30,8 +32,8 @@ artistsRouter.param('artistId', (req, res, next, artistId) => {
   });
 });
 
+//check if mandatory fields are present
 const validatesRequired = (req, res, next) => {
-  //check if mandatory fields are present
   const name = req.body.artist.name;
   const dateOfBirth = req.body.artist.dateOfBirth;
   const biography = req.body.artist.biography;
@@ -41,10 +43,12 @@ const validatesRequired = (req, res, next) => {
   next();
 };
 
+//select 1 specific artist
 artistsRouter.get('/:artistId', (req, res, next) => {
   res.status(200).json({ artist: req.artist });
 });
 
+//inser a new
 artistsRouter.post('/', validatesRequired, (req, res, next) => {
   //if isCurrentlyEmployed is empty, set it to 1
   const isCurrentlyEmployed = req.body.artist.isCurrentlyEmployed || 1;
@@ -70,10 +74,9 @@ artistsRouter.post('/', validatesRequired, (req, res, next) => {
                        if (artist) {
                         res.status(201).json({ artist: artist });
                        }
-                     });
+              });
             }
-          });
-
+  });
 });
         
 //update an artist
@@ -100,9 +103,9 @@ artistsRouter.put('/:artistId', validatesRequired, (req, res, next) => {
                      WHERE  id = ${req.params.artistId}`,
                      (error, artist) => {
                        res.status(200).json({ artist: artist });
-                     });
+             });
            }
-         });
+  });
 });
 
 //delete an artist
@@ -119,9 +122,9 @@ artistsRouter.delete('/:artistId', (req, res, next) => {
                      WHERE  id = ${req.params.artistId}`,
                      (error, artist) => {
                        res.status(200).json({ artist: artist });
-                     });
+             });
            }
-         });
+  });
 });
 
 module.exports = artistsRouter;
