@@ -18,9 +18,7 @@ artistsRouter.get('/', (req, res, next) => {
 });
 
 artistsRouter.param('artistId', (req, res, next, artistId) => {
-  const sql = 'SELECT * FROM Artist WHERE Artist.id = $artistId';
-  const values = {$artistId: artistId};
-  db.get(sql, values, (error, artist) => {
+  db.get(`SELECT * FROM Artist WHERE Artist.id = ${artistId}`, (error, artist) => {
     if (error) {
       next(error);
     } else if (artist) {
@@ -125,4 +123,5 @@ artistsRouter.delete('/:artistId', (req, res, next) => {
            }
          });
 });
+
 module.exports = artistsRouter;
